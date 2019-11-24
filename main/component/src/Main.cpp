@@ -3,7 +3,7 @@
 
 namespace Initial {
 double theta = 60_deg;
-double theta_vel = 0.3;
+double theta_vel = 0.1;
 float Mass = 60;
 float length = 2*100;
 float width = 30;
@@ -19,10 +19,13 @@ void Main()
     const Rect stick(0,0,Initial::width,Initial::length);
     const Vec2 bind_point(stick.pos.x+Initial::width/2.0,stick.pos.y);
     
-    float theta_vel = 0;
-    float theta = 80_deg;
+    float theta_vel = 0.1;
+    float theta = 60_deg;
     
     while(System::Update()){
+        if (Scene::DeltaTime()==0){
+            continue;
+        }
         const Transformer2D t0(Mat3x2::Translate(Scene::Center()-bind_point),true);
         const float theta_f = theta;
         const float theta_ff = theta_vel;
@@ -42,9 +45,8 @@ void Main()
         }else{
             pos_delta = pos_delta/pos_delta.length();
         }
-        const Vec2 theta_a = abs((theta_vel - theta_ff)/Scene::DeltaTime())*pos_delta;
-        
-        
+        const Vec2 theta_a = Scene::Center().y*abs((theta_vel - theta_ff)/Scene::DeltaTime())*pos_delta;
+    
         Initial::theta_vel = Initial::theta_vel -  Scene::DeltaTime()*(Initial::Mass*Initial::g*Initial::length/2.0*sin(Initial::theta)/Initial::Iz) + (Initial::length/2.0)*cos(Initial::theta)*theta_a.y/Initial::Iz-(Initial::length/2.0)*sin(Initial::theta)*theta_a.x/Initial::Iz;
         
         Initial::theta = Initial::theta + Scene::DeltaTime()*Initial::theta_vel;
