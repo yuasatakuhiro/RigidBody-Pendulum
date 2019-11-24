@@ -9,7 +9,7 @@ float length = 2*100;
 float width = 30;
 float bind_length = length/2.0;
 double Iz = Mass*(length/2.0)*(length/2.0)/3.0+Mass*bind_length*bind_length;
-float g = 980;
+float g = 98.0;
 };
 
 void Main()
@@ -47,7 +47,7 @@ void Main()
         }
         const Vec2 theta_a = Scene::Center().y*abs((theta_vel - theta_ff)/Scene::DeltaTime())*pos_delta;
     
-        Initial::theta_vel = Initial::theta_vel -  Scene::DeltaTime()*(Initial::Mass*Initial::g*Initial::length/2.0*sin(Initial::theta)/Initial::Iz) + (Initial::length/2.0)*cos(Initial::theta)*theta_a.y/Initial::Iz-(Initial::length/2.0)*sin(Initial::theta)*theta_a.x/Initial::Iz;
+        Initial::theta_vel = Initial::theta_vel -  Scene::DeltaTime()*(Initial::Mass*Initial::g*Initial::length/2.0*sin(Initial::theta)/Initial::Iz) + (Initial::length/2.0)*cos(Initial::theta)*-theta_a.y/Initial::Iz-(Initial::length/2.0)*sin(Initial::theta)*-theta_a.x/Initial::Iz;
         
         Initial::theta = Initial::theta + Scene::DeltaTime()*Initial::theta_vel;
         
