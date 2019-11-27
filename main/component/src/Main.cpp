@@ -2,59 +2,78 @@
 #include <cmath>
 
 namespace Initial {
-double theta = 60_deg;
-double theta_vel = 0.1;
-float Mass = 60;
-float length = 2*100;
-float width = 30;
-float bind_length = length/2.0;
-double Iz = Mass*(length/2.0)*(length/2.0)/3.0+Mass*bind_length*bind_length;
-float g = 98.0;
+double theta1 = -90_deg;
+double theta2 = 90_deg;
+double theta_vel1 = 0.0;
+double theta_vel2 = 0.0;
+float Mass1 = 1.0;
+float Mass2 = 1.54;
+float length1 = 0.23;
+float length1_ = length1*1000;
+float length2 = 0.33;
+float length2_ = length2*1000;
+float width = 15;
+float g = 9.8;
 };
+
+namespace Mat_elem {
+using namespace Initial;
+double A = (Mass1*4*Mass2)*length1;
+double B = 2*Mass2*length2*cos(theta1-theta2);
+double C = 2*length1*cos(theta1-theta2);
+double D = length2;
+double D1 = -2*Mass2*length2*theta_vel2*theta_vel2*sin(theta1-theta2)-(Mass1+2*Mass2)*g*sin(theta1);
+double D2 = 2*length1*theta_vel1*theta_vel1*sin(theta1-theta2)-g*sin(theta2);
+}
+
+namespace Mat_elem2 {
+using namespace Initial;
+double A1 = (Mass1+Mass2)*length1*length1;
+double A2 = Mass2*length2*length2;
+double B = Mass2*length1*length2*cos(theta1-theta2);
+double D1 = -Mass2*length1*length2*theta_vel2*theta_vel2*sin(theta1-theta2)-(Mass1*Mass2)*g*length1*sin(theta1);
+double D2 = Mass2*length1*length2*theta_vel1*theta_vel1*sin(theta1-theta2)-Mass2*g*length2*sin(theta2);
+}
+
+using namespace Initial;
+using namespace Mat_elem;
 
 void Main()
 {
     Scene::SetBackground(Palette::Skyblue);
-    
-    const Rect stick(0,0,Initial::width,Initial::length);
-    const Vec2 bind_point(stick.pos.x+Initial::width/2.0,stick.pos.y);
-    
-    float theta_vel = 0.1;
-    float theta = 60_deg;
+    const Rect stick1(0,0,Initial::width,Initial::length1_);
+    const Circle knot(0,0,10);
+    const int a = knot.center.x;
+    const int b = knot.center.y;
+    const Rect stick2(Arg::topCenter(a,b),Initial::width,Initial::length2_);
     
     while(System::Update()){
-        if (Scene::DeltaTime()==0){
-            continue;
+        double t = 0.001;
+        
+        for(int i = 0;i<30;i++){
+        A = (Mass1*4*Mass2)*length1;
+        B = 2*Mass2*length2*cos(theta1-theta2);
+        C = 2*length1*cos(theta1-theta2);
+        D = length2;
+        Mat_elem::D1 = -2*Mass2*length2*theta_vel2*theta_vel2*sin(theta1-theta2)-(Mass1+2*Mass2)*g*sin(theta1);
+        Mat_elem::D2 = 2*length1*theta_vel1*theta_vel1*sin(theta1-theta2)-g*sin(theta2);
+        
+        double ADBC = 1.0/A*D-B*C;
+        
+        theta_vel1 = theta_vel1 + t*(ADBC*(D*Mat_elem::D1-B*Mat_elem::D2));
+        
+        theta_vel2 = theta_vel2 + t*(ADBC*(-A*Mat_elem::D1+C*Mat_elem::D1));
+        
+        theta1 = theta1 + t*theta_vel1;
+        theta2 = theta2 + t*theta_vel2;
         }
-        const Transformer2D t0(Mat3x2::Translate(Scene::Center()-bind_point),true);
-        const float theta_f = theta;
-        const float theta_ff = theta_vel;
+        const Transformer2D t0(Mat3x2::Translate(Scene::Center()-Vec2(width/2.0,100)),true);
+        stick1.rotatedAt(stick1.pos+Vec2(width/2.0,0),theta1).draw(Palette::Orange);
+
+        const Vec2 point = OffsetCircular(Vec2(width/2.0,0),length1_,180_deg+theta1);
+        const Transformer2D t1(Mat3x2::Translate(point));
         
-        theta_vel = theta_vel - Scene::DeltaTime()*Initial::g*sin(theta)/Scene::Center().y;
-        theta = theta + Scene::DeltaTime()*theta_vel;
-        
-        const Vec2 pos = OffsetCircular(Vec2(bind_point.x,bind_point.y-Scene::Center().y),static_cast<double>(Scene::Center().y),180_deg+theta);
-        
-        const Vec2 pos_1 = OffsetCircular(Vec2(bind_point.x,bind_point.y-Scene::Center().y),static_cast<double>(Scene::Center().y),180_deg+theta_f);
-        
-        const Vec2 pos_2 = OffsetCircular(Vec2(bind_point.x,bind_point.y-Scene::Center().y),static_cast<double>(Scene::Center().y),180_deg+theta+(theta-theta_f));
-        
-        Vec2 pos_delta = (pos_2-pos_1);
-        if(pos_delta.length() == 0){
-            pos_delta = Vec2(0,0);
-        }else{
-            pos_delta = pos_delta/pos_delta.length();
-        }
-        const Vec2 theta_a = Scene::Center().y*abs((theta_vel - theta_ff)/Scene::DeltaTime())*pos_delta;
-    
-        Initial::theta_vel = Initial::theta_vel -  Scene::DeltaTime()*(Initial::Mass*Initial::g*Initial::length/2.0*sin(Initial::theta)/Initial::Iz) + (Initial::length/2.0)*cos(Initial::theta)*-theta_a.y/Initial::Iz-(Initial::length/2.0)*sin(Initial::theta)*-theta_a.x/Initial::Iz;
-        
-        Initial::theta = Initial::theta + Scene::DeltaTime()*Initial::theta_vel;
-        
-        Circle(bind_point.movedBy(pos),10).draw(Palette::White);
-        Line(bind_point.movedBy(pos),Vec2(bind_point.x,-Scene::Center().y)).draw(Palette::Green);
-        
-        const Transformer2D t1(Mat3x2::Translate(pos));
-        stick.rotatedAt(bind_point,Initial::theta).draw(Palette::Black);
+        knot.draw(Palette::Black);
+        stick2.rotatedAt(knot.center,theta2).draw(Palette::Green);
     }
 }
