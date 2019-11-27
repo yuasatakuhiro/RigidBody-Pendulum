@@ -2,13 +2,13 @@
 #include <cmath>
 
 namespace Initial {
-double theta1 = -90_deg;
+double theta1 = 90_deg;
 double theta2 = 90_deg;
 double theta_vel1 = 0.0;
 double theta_vel2 = 0.0;
-float Mass1 = 1.0;
-float Mass2 = 1.54;
-float length1 = 0.23;
+float Mass1 = 0.40;
+float Mass2 = 0.54;
+float length1 = 0.43;
 float length1_ = length1*1000;
 float length2 = 0.33;
 float length2_ = length2*1000;
@@ -46,6 +46,15 @@ void Main()
     const int a = knot.center.x;
     const int b = knot.center.y;
     const Rect stick2(Arg::topCenter(a,b),Initial::width,Initial::length2_);
+    
+    Window::SetStyle(WindowStyle::Sizable);
+    Scene::SetScaleMode(ScaleMode::ResizeFill);
+    Window::Maximize();
+    Scene::SetLetterbox(Palette::Black);
+    Window::SetStyle(WindowStyle::Sizable);
+    //Scene::SetScaleMode(ScaleMode::ResizeFill);
+    Window::Maximize();
+    Scene::SetLetterbox(Palette::Black);
     
     while(System::Update()){
         double t = 0.001;
