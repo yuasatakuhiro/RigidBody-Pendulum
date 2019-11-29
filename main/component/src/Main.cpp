@@ -83,14 +83,7 @@ void Main()
         
         for(auto i:step(num)){
             
-        const Transformer2D t0(Mat3x2::Translate(Scene::Center()-Vec2(width[i]/2.0,100)),true);
-        stick1[i].rotatedAt(stick1[i].pos+Vec2(width[i]/2.0,0),theta1[i]).draw(Palette::Orange);
-
-        const Vec2 point = OffsetCircular(Vec2(width[i]/2.0,0),length1_[i],180_deg+theta1[i]);
-        const Transformer2D t1(Mat3x2::Translate(point));
         
-        knot[i].draw(Palette::Black);
-        stick2[i].rotatedAt(knot[i].center,theta2[i]).draw(Palette::Green);
             }
         }
 }
